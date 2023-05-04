@@ -7,6 +7,6 @@ def string_gen(size=20, chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 if __name__ == '__main__':
     port = 21000
     while True:
-        s = str(port) + '/write \'{"Set":{"key":'+ str(time.time()) +',"value":'+ string_gen() +'}}\''
+        s = str(port) + '/write \'{"Set":{"key":'+ str(time.time()) +',"value": ['+ str(port) + "] " + string_gen() +'}}\''
         print(s)
         time.sleep(random.randint(1, 5))
