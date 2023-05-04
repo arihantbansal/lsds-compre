@@ -1,6 +1,5 @@
 use std::sync::Arc;
 use std::time::Duration;
-use std::time::SystemTime;
 
 use crate::NodeId;
 use crate::Raft;

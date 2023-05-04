@@ -1,11 +1,13 @@
-# Example distributed key-value store built upon openraft.
+# Distributed Message Storage using Raft
 
 It is an example of how to build a real-world key-value store with `openraft`.
 Includes:
+
 - An in-memory `RaftStorage` implementation [store](./src/store/store.rs).
 
 - A server is based on [actix-web](https://docs.rs/actix-web/4.0.0-rc.2).  
   Includes:
+
   - raft-internal network APIs for replication and voting.
   - Admin APIs to add nodes, change-membership etc.
   - Application APIs to write a value by key or read a value by key.
@@ -13,6 +15,7 @@ Includes:
 - Client and `RaftNetwork`([rpc](./src/network/raft_network_impl)) are built upon [reqwest](https://docs.rs/reqwest).
 
   [ExampleClient](./src/client.rs) is a minimal raft client in rust to talk to a raft cluster.
+
   - It includes application API `write()` and `read()`, and administrative API `init()`, `add_learner()`, `change_membership()`, `metrics()`.
   - This client tracks the last known leader id, a write operation(such as `write()` or `change_membership()`) will be redirected to the leader on client side.
 
@@ -32,7 +35,6 @@ There is a example in bash script and an example in rust:
   with the `ExampleClient`.
 
   Run it with `cargo test`.
-
 
 if you want to compile the application, run:
 
@@ -96,14 +98,13 @@ POST - 127.0.0.1:21002/read  "foo"
 
 You should be able to read that on the another instance even if you did not sync any data!
 
-
 ## How it's structured.
 
 The application is separated in 4 modules:
 
- - `bin`: You can find the `main()` function in [main](./src/bin/main.rs) the file where the setup for the server happens.
- - `network`: You can find the [api](./src/network/api.rs) that implements the endpoints used by the public API and [rpc](./src/network/raft_network_impl) where all the raft communication from the node happens. [management](./src/network/management.rs) is where all the administration endpoints are present, those are used to add orremove nodes, promote and more. [raft](./src/network/raft.rs) is where all the communication are received from other nodes.
- - `store`: You can find the file [store](./src/store/mod.rs) where all the key-value implementation is done. Here is where your data application will be managed.
+- `bin`: You can find the `main()` function in [main](./src/bin/main.rs) the file where the setup for the server happens.
+- `network`: You can find the [api](./src/network/api.rs) that implements the endpoints used by the public API and [rpc](./src/network/raft_network_impl) where all the raft communication from the node happens. [management](./src/network/management.rs) is where all the administration endpoints are present, those are used to add orremove nodes, promote and more. [raft](./src/network/raft.rs) is where all the communication are received from other nodes.
+- `store`: You can find the file [store](./src/store/mod.rs) where all the key-value implementation is done. Here is where your data application will be managed.
 
 ## Where is my data?
 
@@ -126,3 +127,4 @@ To add a node to a cluster, it includes 3 steps:
 - Write a `node` through raft protocol to the storage.
 - Add the node as a `Learner` to let it start receiving replication data from the leader.
 - Invoke `change-membership` to change the learner node to a member.
+

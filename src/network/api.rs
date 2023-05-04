@@ -8,6 +8,7 @@ use openraft::error::Infallible;
 use openraft::error::RaftError;
 use openraft::BasicNode;
 use std::sync::Arc;
+use std::sync::Mutex;
 use web::Json;
 
 use crate::app::App;
@@ -32,7 +33,8 @@ pub async fn write(app: Data<App>, req: Json<Request>) -> actix_web::Result<impl
     let response = app.raft.client_write(req.0).await;
     let mut f = app.flag.clone();
     f = Arc::new(true);
-    println!("flag = {f}");
+
+    println!("flag = {:?}", f);
     println!("arc flag ={:?}", app.flag);
 
     Ok(Json(response))
