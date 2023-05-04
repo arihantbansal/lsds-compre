@@ -1,5 +1,5 @@
 use clap::Parser;
-use raft_kv_memstore::start_example_raft_node;
+use p2p_messages::start_example_raft_node;
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser, Clone, Debug)]
