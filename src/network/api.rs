@@ -2,10 +2,12 @@ use actix_web::post;
 use actix_web::web;
 use actix_web::web::Data;
 use actix_web::Responder;
+use actix_web::ResponseError;
 use openraft::error::CheckIsLeaderError;
 use openraft::error::Infallible;
 use openraft::error::RaftError;
 use openraft::BasicNode;
+use std::sync::Arc;
 use web::Json;
 
 use crate::app::App;
@@ -23,7 +25,16 @@ use crate::NodeId;
  */
 #[post("/write")]
 pub async fn write(app: Data<App>, req: Json<Request>) -> actix_web::Result<impl Responder> {
+    // if *app.flag.as_ref() {
+    //     return Ok(ResponseError::status_code());
+    // }
+
     let response = app.raft.client_write(req.0).await;
+    let mut f = app.flag.clone();
+    f = Arc::new(true);
+    println!("flag = {f}");
+    println!("arc flag ={:?}", app.flag);
+
     Ok(Json(response))
 }
 
@@ -38,7 +49,10 @@ pub async fn read(app: Data<App>, req: Json<String>) -> actix_web::Result<impl R
 }
 
 #[post("/consistent_read")]
-pub async fn consistent_read(app: Data<App>, req: Json<String>) -> actix_web::Result<impl Responder> {
+pub async fn consistent_read(
+    app: Data<App>,
+    req: Json<String>,
+) -> actix_web::Result<impl Responder> {
     let ret = app.raft.is_leader().await;
 
     match ret {

@@ -3,6 +3,8 @@
 
 use std::io::Cursor;
 use std::sync::Arc;
+use std::time::Duration;
+use std::time::SystemTime;
 
 use actix_web::middleware;
 use actix_web::middleware::Logger;
@@ -45,7 +47,8 @@ pub mod typ {
     use crate::TypeConfig;
 
     pub type RaftError<E = openraft::error::Infallible> = openraft::error::RaftError<NodeId, E>;
-    pub type RPCError<E = openraft::error::Infallible> = openraft::error::RPCError<NodeId, BasicNode, RaftError<E>>;
+    pub type RPCError<E = openraft::error::Infallible> =
+        openraft::error::RPCError<NodeId, BasicNode, RaftError<E>>;
 
     pub type ClientWriteError = openraft::error::ClientWriteError<NodeId, BasicNode>;
     pub type CheckIsLeaderError = openraft::error::CheckIsLeaderError<NodeId, BasicNode>;
@@ -55,7 +58,13 @@ pub mod typ {
     pub type ClientWriteResponse = openraft::raft::ClientWriteResponse<TypeConfig>;
 }
 
-pub async fn start_example_raft_node(node_id: NodeId, http_addr: String) -> std::io::Result<()> {
+pub async fn start_example_raft_node(
+    node_id: NodeId,
+    http_addr: String,
+    initialized_at: u128,
+    timeout: u64,
+    flag: Arc<bool>,
+) -> std::io::Result<()> {
     // Create a configuration for the raft instance.
     let config = Config {
         heartbeat_interval: 500,
@@ -76,7 +85,11 @@ pub async fn start_example_raft_node(node_id: NodeId, http_addr: String) -> std:
     let network = Network {};
 
     // Create a local raft instance.
-    let raft = openraft::Raft::new(node_id, config.clone(), network, log_store, state_machine).await.unwrap();
+    let raft = openraft::Raft::new(node_id, config.clone(), network, log_store, state_machine)
+        .await
+        .unwrap();
+
+    let epsilon = Duration::from_secs(timeout);
 
     // Create an application that will store all the instances created above, this will
     // be later used on the actix-web services.
@@ -86,6 +99,9 @@ pub async fn start_example_raft_node(node_id: NodeId, http_addr: String) -> std:
         raft,
         store,
         config,
+        initialized_at,
+        epsilon,
+        flag,
     });
 
     // Start the actix-web server.

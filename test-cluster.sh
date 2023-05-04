@@ -43,7 +43,7 @@ rpc() {
 
 export RUST_LOG=trace
 
-echo "Killing all running raft-key-value"
+echo "Killing all running p2p-messages"
 
 kill
 
@@ -51,15 +51,17 @@ sleep 1
 
 echo "Start 3 uninitialized raft-key-value servers..."
 
-nohup ./target/debug/raft-key-value  --id 1 --http-addr 127.0.0.1:21001 > n1.log &
+init_time=$(date +%s)
+
+nohup ./target/debug/raft-key-value  --id 1 --http-addr 127.0.0.1:21001 --initialized-at $init_time  --timeout 3 > n1.log &
 sleep 1
 echo "Server 1 started"
 
-nohup ./target/debug/raft-key-value  --id 2 --http-addr 127.0.0.1:21002 > n2.log &
+nohup ./target/debug/raft-key-value  --id 2 --http-addr 127.0.0.1:21002 --initialized-at $init_time  --timeout 3 > n2.log &
 sleep 1
 echo "Server 2 started"
 
-nohup ./target/debug/raft-key-value  --id 3 --http-addr 127.0.0.1:21003 > n3.log &
+nohup ./target/debug/raft-key-value  --id 3 --http-addr 127.0.0.1:21003 --initialized-at $init_time  --timeout 3 > n3.log &
 sleep 1
 echo "Server 3 started"
 sleep 1

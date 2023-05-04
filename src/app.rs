@@ -1,4 +1,6 @@
 use std::sync::Arc;
+use std::time::Duration;
+use std::time::SystemTime;
 
 use crate::NodeId;
 use crate::Raft;
@@ -12,4 +14,7 @@ pub struct App {
     pub raft: Raft,
     pub store: Arc<Store>,
     pub config: Arc<openraft::Config>,
+    pub initialized_at: u128,
+    pub epsilon: Duration,
+    pub flag: Arc<bool>,
 }

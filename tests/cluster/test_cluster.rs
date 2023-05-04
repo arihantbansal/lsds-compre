@@ -1,8 +1,11 @@
 use std::backtrace::Backtrace;
 use std::collections::BTreeMap;
 use std::panic::PanicInfo;
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 use maplit::btreemap;
 use maplit::btreeset;
@@ -86,20 +89,50 @@ async fn test_cluster() -> anyhow::Result<()> {
     // --- Start 3 raft node in 3 threads.
 
     let _h1 = thread::spawn(|| {
+        let initialized_at = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        let timeout = 3;
+        let mut flag: Arc<bool> = Arc::new(false);
+
         let rt = Runtime::new().unwrap();
-        let x = rt.block_on(start_example_raft_node(1, "127.0.0.1:21001".to_string()));
+        let x = rt.block_on(start_example_raft_node(
+            1,
+            "127.0.0.1:21001".to_string(),
+            initialized_at.as_millis(),
+            timeout,
+            flag,
+        ));
         println!("x: {:?}", x);
     });
 
     let _h2 = thread::spawn(|| {
+        let initialized_at = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        let timeout = 3;
+        let mut flag: Arc<bool> = Arc::new(false);
+
         let rt = Runtime::new().unwrap();
-        let x = rt.block_on(start_example_raft_node(2, "127.0.0.1:21002".to_string()));
+        let x = rt.block_on(start_example_raft_node(
+            2,
+            "127.0.0.1:21002".to_string(),
+            initialized_at.as_millis(),
+            timeout,
+            flag,
+        ));
         println!("x: {:?}", x);
     });
 
     let _h3 = thread::spawn(|| {
+        let initialized_at = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        let timeout = 3;
+        let mut flag: Arc<bool> = Arc::new(false);
+
         let rt = Runtime::new().unwrap();
-        let x = rt.block_on(start_example_raft_node(3, "127.0.0.1:21003".to_string()));
+        let x = rt.block_on(start_example_raft_node(
+            3,
+            "127.0.0.1:21003".to_string(),
+            initialized_at.as_millis(),
+            timeout,
+            flag,
+        ));
         println!("x: {:?}", x);
     });
 
